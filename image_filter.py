@@ -30,7 +30,7 @@ def get_images(directory=None):
             pass # do nothing with errors tying to open non-images
     return image_list, file_list
   
-def alter_one_image(original_image, skew):
+def filter_one_image(original_image, skew):
     #Gets size of image
     try:
         original_image = original_image.convert('RGBA')
@@ -46,12 +46,38 @@ def alter_one_image(original_image, skew):
             original_image.putpixel((x,n), (a,b,c,d))
     result = PIL.Image.new('RGBA', (width,height))
     result.paste(original_image, (0,0))
+
+    snuffles = PIL.Image.open("snuffles.PNG")
+    small_snuffles = snuffles.resize((10,10))
+    for x in range(height):
+        for n in range(width):
+            if random.random() < 5:
+                if sum(original_image.getpixel((x,n))) < 500: 
+                    result.paste(small_snuffles, (x,n))
+                    
     sparkle = PIL.Image.open('sparkles.png')
-    sparkle.resize(20,20)
+    small_sparkle = sparkle.resize((20,20))
+    for x in range(height):
+        for n in range(width):
+            if random.random() < .001: 
+                result.paste(small_sparkle, (x, n))
+                
+    ##ghost = PIL.Image.open("Snapchat_ghost.png")
+    ##ghost_resized = ghost.resize((height,width))
+    ##for x in range(height):
+    ##    for n in range(width):
+    ##        a, b, c, d = ghost_resized.getpixel((x,n))
+    ##        d = 50
+    ##        ghost_resized_recolored = ghost_resized.putpixel((x,n), (a,b,c,d))
+    ##result.paste(ghost_resized_recolored, (0,0))
+    
+    god = PIL.Image.open("snufflesisagod.png")
+    small_god = god.resize((int(.125*width), int(.125*height)))
+    result.paste(small_god, (0+int((height*(7/8)),0+int((width*(7/8))))))
     
     return result
     
-def alter_all_images(skew, directory=None):
+def filter_all_images(skew, directory=None):
     if directory == None:
         directory = os.getcwd() # Use working directory if unspecified
         
@@ -73,7 +99,7 @@ def alter_all_images(skew, directory=None):
         
         # Round the corners with default percent of radius
         curr_image = image_list[n]
-        new_image = alter_one_image(curr_image, skew) 
+        new_image = filter_one_image(curr_image, skew) 
         
         # Save the altered image, suing PNG to retain transparency
         new_image_filename = os.path.join(new_directory, filename + '.png')
